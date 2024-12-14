@@ -7,6 +7,19 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas.height = height;
   canvas.width = width;
 
+  let gradient = context.createLinearGradient(
+    0,
+    canvas.height,
+    canvas.width,
+    0
+  );
+  gradient.addColorStop(0, "red");
+  gradient.addColorStop(0.2, "yellow");
+  gradient.addColorStop(0.4, "indigo");
+  gradient.addColorStop(0.6, "pink");
+  gradient.addColorStop(0.8, "green");
+  gradient.addColorStop(1, "blue");
+
   // Classes and Objects
   class Symbols {
     constructor(x, y, fontSize, canvasHeight) {
@@ -23,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
       this.text = this.characters.charAt(
         Math.ceil(Math.random() * this.characters.length)
       );
-      context.fillStyle = "#0aff0a";
+      // context.fillStyle = "#0aff0a";
       context.fillText(
         this.text,
         this.x * this.fontSize,
@@ -56,20 +69,35 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const effect = new Effects(width, height);
+  let lastTime = 0;
+  const fps = 17;
+  const nextFrame = 1000 / fps;
+  let timer = 0;
 
-  const animate = () => {
-    context.fillStyle = `rgba(0, 0, 0, 0.05)`;
-    context.fillRect(0, 0, width, height);
-    context.font = effect.fontSize + "px cursive";
-    effect.symbols.forEach((symbol) => {
-      symbol.draw(context);
-    });
+  const animate = (timeStamp) => {
+    const deltaTime = timeStamp - lastTime;
+    lastTime = deltaTime;
+
+    if (timer > nextFrame) {
+      context.fillStyle = `rgba(0, 0, 0, 0.05)`;
+      context.textAlign = "center";
+      context.fillRect(0, 0, width, height);
+      context.fillStyle = gradient;
+      context.font = effect.fontSize + "px cursive";
+      effect.symbols.forEach((symbol) => {
+        symbol.draw(context);
+      });
+
+      timer = 0;
+    } else {
+      timer += deltaTime;
+    }
 
     // Request the next animation frame
     requestAnimationFrame(animate);
   };
 
-  animate();
+  animate(0.1);
 
   const main = () => {
     canvas.height = height;
@@ -77,6 +105,8 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   window.addEventListener("resize", () => {
+    canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
     height = window.innerHeight;
     width = window.innerWidth;
     main();
